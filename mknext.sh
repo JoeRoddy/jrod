@@ -112,4 +112,4 @@ git add .
 git commit -m "Initial commit from mknext script"
 
 echo "▶ Opening app in VSCode"
-code .
+/usr/bin/open -a "Visual Studio Code" .
