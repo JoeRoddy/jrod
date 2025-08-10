@@ -1,0 +1,19 @@
+{
+  "name": "jrod",
+  "version": "1.0.0",
+  "description": "Misc development scripts",
+  "type": "commonjs",
+  "bin": {
+    "jrod": "./bin/cli.js"
+  },
+  "scripts": {
+    "postinstall": "chmod +x mknext.sh",
+    "start": "node ./bin/jrod.js --help"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^12.1.0"
+  }
+}
