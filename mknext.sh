@@ -14,7 +14,15 @@ touchp() {
 }
 
 catp() {
-    mkdir -p "$(dirname "$1")" && touch "$1" && cat "$1"
+  [ $# -eq 1 ] || { echo "usage: catp <path>" >&2; return 2; }
+  local path=$1
+  mkdir -p -- "$(dirname -- "$path")"
+  if [ -t 0 ]; then
+    : >"$path"  # touch if missing
+    cat -- "$path"
+  else
+    cat >"$path"
+  fi
 }
 
 APP_NAME="$1"
@@ -90,17 +98,18 @@ if [[ -z "${DB_URL}" ]]; then
 fi
 
 # update schema.prisma contents
-catp > .env.local <<EOF
+catp .env.local <<EOF
 DATABASE_URL=${DB_URL}
-BETTER_AUTH_URL=http://localhost:3000 
+BETTER_AUTH_URL=http://localhost:3000
 BETTER_AUTH_SECRET=your_auth_secret
 EOF
 
 echo "▶ Pushing Prisma schema to remote database"
+# this is the only thing causing an issue, maybe 
 npx env-cmd -f .env.local prisma db push
 
 # configure better-auth
-catp > ./src/lib/auth.ts <<EOF
+catp ./src/lib/auth.ts <<'EOF'
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { PrismaClient } from '@/generated/prisma';
@@ -120,10 +129,12 @@ export const getServerSession = async (headers?: Headers) =>
   auth.api.getSession({ headers: headers || (await getHeaders()) });
 EOF
 
-yes | npx @better-auth/cli@latest generate 
+# yes | npx @better-auth/cli@latest generate 
+# locally disable pipefail just for this line, prevents script exit
+(set +o pipefail; yes | npx @better-auth/cli@latest generate)
 
 # update generated page.tsx
-cat > src/app/page.tsx <<'EOF'
+catp src/app/page.tsx <<'EOF'
 import { Button } from '@/components/ui/button';
 import { auth, getServerSession } from '@/lib/auth';
 import { headers as getHeaders } from 'next/headers';
@@ -162,7 +173,7 @@ export default async function Home() {
 EOF
 
 # create sign-in page
-catp > src/app/sign-in/page.tsx <<'EOF'
+catp src/app/sign-in/page.tsx <<'EOF'
 import { EmailAuthForm } from "@/components/auth/email-auth-form";
 
 export default function SignInPage() {
@@ -171,7 +182,7 @@ export default function SignInPage() {
 EOF
 
 # create sign-up page
-catp > src/app/sign-up/page.tsx <<'EOF'
+catp src/app/sign-up/page.tsx <<'EOF'
 import { EmailAuthForm } from "@/components/auth/email-auth-form";
 
 export default function SignUpPage() {
@@ -180,7 +191,7 @@ export default function SignUpPage() {
 EOF
 
 # create the email auth form component
-catp > src/components/auth/email-auth-form.tsx <<'EOF'
+catp src/components/auth/email-auth-form.tsx <<'EOF'
 "use client";
 
 import * as React from "react";
@@ -335,6 +346,24 @@ export function EmailAuthForm({ mode }: { mode: EmailAuthMode }) {
     </div>
   );
 }
+EOF
+
+# create the auth client
+catp src/lib/auth-client.ts <<'EOF'
+import { createAuthClient } from "better-auth/react"
+
+export const authClient = createAuthClient({
+    /** The base URL of the server (optional if you're using the same domain) */
+    baseURL: process.env.BETTER_AUTH_URL
+})
+EOF
+
+# mk api route
+catp src/app/api/auth/[...all]/route.ts <<'EOF'
+import { auth } from "@/lib/auth";
+import { toNextJsHandler } from "better-auth/next-js";
+ 
+export const { POST, GET } = toNextJsHandler(auth);
 EOF
 
 
