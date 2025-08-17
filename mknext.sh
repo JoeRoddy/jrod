@@ -104,9 +104,6 @@ BETTER_AUTH_URL=http://localhost:3000
 BETTER_AUTH_SECRET=your_auth_secret
 EOF
 
-echo "▶ Pushing Prisma schema to remote database"
-# this is the only thing causing an issue, maybe 
-npx env-cmd -f .env.local prisma db push
 
 # configure better-auth
 catp ./src/lib/auth.ts <<'EOF'
@@ -129,9 +126,16 @@ export const getServerSession = async (headers?: Headers) =>
   auth.api.getSession({ headers: headers || (await getHeaders()) });
 EOF
 
+# gotta do this before better-auth sadly
+npx prisma generate
 # yes | npx @better-auth/cli@latest generate 
 # locally disable pipefail just for this line, prevents script exit
+# auth.ts MUST exist before this command is run
 (set +o pipefail; yes | npx @better-auth/cli@latest generate)
+
+echo "▶ Pushing Prisma schema to remote database"
+# this is the only thing causing an issue, maybe 
+npx env-cmd -f .env.local prisma db push
 
 # update generated page.tsx
 catp src/app/page.tsx <<'EOF'
