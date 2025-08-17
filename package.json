@@ -6,14 +6,23 @@
   "bin": {
     "jrod": "./bin/cli.js"
   },
+  "main": "dist/cli.js",
+  "types": "dist/cli.d.ts",
   "scripts": {
-    "postinstall": "chmod +x mknext.sh",
-    "start": "node ./bin/jrod.js --help"
+    "postinstall": "chmod +x mknext.sh && chmod +x ./bin/cli.js",
+    "build": "tsc -p tsconfig.json",
+    "prepublish": "npm run build",
+    "publish": "npm run build && npm version patch && npm publish",
+    "start": "node ./bin/cli.js --help"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "@types/node": "^20.4.2"
   }
 }
