@@ -4,16 +4,16 @@
   "description": "Misc development scripts",
   "type": "commonjs",
   "bin": {
-    "jrod": "./bin/cli.js"
+    "jrod": "dist/cli.js"
   },
   "main": "dist/cli.js",
   "types": "dist/cli.d.ts",
   "scripts": {
-    "postinstall": "chmod +x mknext.sh && chmod +x ./bin/cli.js",
     "build": "tsc -p tsconfig.json",
-    "prepublish": "npm run build",
-    "npm-publish": "npm run build && npm version patch && npm publish",
-    "start": "node ./bin/cli.js --help"
+    "postbuild": "chmod +x dist/cli.js mknext.sh",
+    "prepare": "npm run build && npm run postbuild",
+    "npm-publish": "npm run prepare && npm version patch && npm publish",
+    "start": "node dist/cli.js --help"
   },
   "keywords": [],
   "author": "",
