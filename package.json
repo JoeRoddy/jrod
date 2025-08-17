@@ -10,7 +10,6 @@
   "types": "dist/cli.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "postbuild": "chmod +x dist/cli.js mknext.sh",
     "prepare": "npm run build && npm run postbuild",
     "npm-publish": "npm run prepare && npm version patch && npm publish",
     "start": "node dist/cli.js --help"
