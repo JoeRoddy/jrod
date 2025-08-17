@@ -18,10 +18,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "eta": "^3.5.0"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
-    "@types/node": "^20.4.2"
+    "@types/node": "^20.4.2",
+    "typescript": "^5.2.2"
   }
 }
