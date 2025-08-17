@@ -2,8 +2,7 @@ import { spawn } from 'child_process';
 import { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
-// eta rendering handled via shared util
-import { renderTemplates } from '../../utils';
+import { renderTemplates } from '@/utils';
 
 export const mkNextCommand = new Command('mknext')
   .argument('<app-name>', 'App directory name')
@@ -86,6 +85,8 @@ const mkNextApp = async (appName: string) => {
 
   const projectDir = path.resolve(process.cwd(), appName);
 
+  fs.appendFileSync(path.join(projectDir, '.gitignore'), '\n.env.*.local');
+
   console.log('▶ Initializing shadcn/ui (non-interactive)');
   await runInherit('npx', ['--yes', 'shadcn@latest', 'init', '-y', '--template', 'next', '--base-color', 'neutral'], {
     cwd: projectDir,
@@ -100,20 +101,24 @@ const mkNextApp = async (appName: string) => {
 
   console.log('▶ Prisma init (PostgreSQL)');
   await runInherit('npx', ['prisma', 'init', '--datasource-provider', 'postgresql'], { cwd: projectDir });
-  // empty the .env file
+  // empty the .env file crap dumped by prisma
   fs.writeFileSync(path.join(projectDir, '.env'), '');
-
-  console.log('▶ Rendering templates');
-  await renderTemplates({ projectDir, templatesDir: path.join(__dirname, 'templates') });
 
   console.log('▶ Creating a temporary Prisma Postgres database (expires ~24h)');
   const createDb = await run('npx', ['--yes', 'create-db@latest'], { cwd: projectDir, allowFail: true });
   const dbUrlMatch = createDb.stdout.split(/\s+/).find((t) => t.startsWith('postgresql://')) || '';
   if (!dbUrlMatch) throw new Error('Failed to obtain a database URL from create-db.');
 
-  const envLocalPath = path.join(projectDir, '.env.local');
-  const envLocal = `DATABASE_URL=${dbUrlMatch}\nBETTER_AUTH_URL=http://localhost:3000\nBETTER_AUTH_SECRET=your_auth_secret\n`;
-  fs.writeFileSync(envLocalPath, envLocal);
+  console.log('▶ Rendering templates');
+  await renderTemplates({
+    projectDir,
+    templatesDir: path.join(__dirname, 'templates'),
+    variables: {
+      '.env.local': {
+        DATABASE_URL: dbUrlMatch,
+      },
+    },
+  });
 
   // (auth.ts generated from templates)
 
@@ -128,13 +133,14 @@ const mkNextApp = async (appName: string) => {
 
   // (UI & auth-client files rendered from templates)
 
-  console.log('▶ Committing changes to git');
-  try {
-    await run('git', ['add', '.'], { cwd: projectDir });
-    await run('git', ['commit', '-m', 'Initial commit from mknext script'], { cwd: projectDir, allowFail: true });
-  } catch (e) {
-    console.warn('Git commit skipped or failed:', (e as Error).message);
-  }
+  // commenting for now, fucking up dev history
+  // console.log('▶ Committing changes to git');
+  // try {
+  //   await run('git', ['add', '.'], { cwd: projectDir });
+  //   await run('git', ['commit', '-m', 'Initial commit from mknext script'], { cwd: projectDir, allowFail: true });
+  // } catch (e) {
+  //   console.warn('Git commit skipped or failed:', (e as Error).message);
+  // }
 
   console.log('▶ Opening app in editor (best effort)');
   try {

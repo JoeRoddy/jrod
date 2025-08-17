@@ -7,6 +7,12 @@ export interface RenderTemplatesOptions {
   templatesDir: string; // Absolute path to the templates root
   data?: Record<string, any>; // Data passed to Eta templates
   verbose?: boolean; // Log each rendered file
+  /**
+   * Optional per-file variable map.
+   * Key: relative output path (e.g. 'src/app/page.tsx') OR template relative path (e.g. 'src/app/page.tsx.eta').
+   * Value: object merged into the template data ONLY for that file.
+   */
+  variables?: Record<string, Record<string, any>>;
 }
 
 /**
@@ -14,7 +20,7 @@ export interface RenderTemplatesOptions {
  * preserving the relative folder structure and stripping the trailing .eta extension.
  */
 export async function renderTemplates(opts: RenderTemplatesOptions): Promise<void> {
-  const { projectDir, templatesDir, data = {}, verbose = true } = opts;
+  const { projectDir, templatesDir, data = {}, verbose = true, variables } = opts;
   if (!fs.existsSync(templatesDir)) {
     if (verbose) console.warn('[renderTemplates] templatesDir does not exist:', templatesDir);
     return;
@@ -33,8 +39,10 @@ export async function renderTemplates(opts: RenderTemplatesOptions): Promise<voi
         const outPath = path.join(projectDir, outRel);
         const templateContent = fs.readFileSync(full, 'utf8');
         let rendered: string;
+        const fileVars = (variables && (variables[outRel] || variables[relFromTemplates])) || {};
+        const mergedData = { ...data, ...fileVars };
         try {
-          rendered = eta.renderString(templateContent, data);
+          rendered = eta.renderString(templateContent, mergedData);
         } catch (e) {
           throw new Error(`Failed rendering template ${relFromTemplates}: ${(e as Error).message}`);
         }
