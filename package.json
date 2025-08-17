@@ -12,7 +12,7 @@
     "postinstall": "chmod +x mknext.sh && chmod +x ./bin/cli.js",
     "build": "tsc -p tsconfig.json",
     "prepublish": "npm run build",
-    "publish": "npm run build && npm version patch && npm publish",
+    "npm-publish": "npm run build && npm version patch && npm publish",
     "start": "node ./bin/cli.js --help"
   },
   "keywords": [],
