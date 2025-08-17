@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
-import { renderTemplates } from '@/utils';
+import { isDevEnvironment, renderTemplates } from '@/utils';
 
 export const mkNextCommand = new Command('mknext')
   .argument('<app-name>', 'App directory name')
@@ -109,7 +109,7 @@ const mkNextApp = async (appName: string) => {
   const dbUrlMatch = createDb.stdout.split(/\s+/).find((t) => t.startsWith('postgresql://')) || '';
   if (!dbUrlMatch) throw new Error('Failed to obtain a database URL from create-db.');
 
-  console.log('▶ Rendering templates');
+  console.log('▶ Adding template code');
   await renderTemplates({
     projectDir,
     templatesDir: path.join(__dirname, 'templates'),
@@ -120,8 +120,6 @@ const mkNextApp = async (appName: string) => {
     },
   });
 
-  // (auth.ts generated from templates)
-
   console.log('▶ Prisma generate');
   await runInherit('npx', ['prisma', 'generate'], { cwd: projectDir });
 
@@ -131,18 +129,19 @@ const mkNextApp = async (appName: string) => {
   console.log('▶ Pushing Prisma schema to remote database');
   await runInherit('npx', ['env-cmd', '-f', '.env.local', 'prisma', 'db', 'push'], { cwd: projectDir });
 
-  // (UI & auth-client files rendered from templates)
+  if (isDevEnvironment()) {
+    console.log('▶ Skipping git commit (dev mode detected)');
+  } else {
+    console.log('▶ Committing changes to git');
+    try {
+      await run('git', ['add', '.'], { cwd: projectDir });
+      await run('git', ['commit', '-m', 'Initial commit from mknext script'], { cwd: projectDir, allowFail: true });
+    } catch (e) {
+      console.warn('Git commit skipped or failed:', (e as Error).message);
+    }
+  }
 
-  // commenting for now, fucking up dev history
-  // console.log('▶ Committing changes to git');
-  // try {
-  //   await run('git', ['add', '.'], { cwd: projectDir });
-  //   await run('git', ['commit', '-m', 'Initial commit from mknext script'], { cwd: projectDir, allowFail: true });
-  // } catch (e) {
-  //   console.warn('Git commit skipped or failed:', (e as Error).message);
-  // }
-
-  console.log('▶ Opening app in editor (best effort)');
+  console.log('▶ Opening VS Code');
   try {
     if (process.platform === 'darwin') {
       await run('open', ['-a', 'Visual Studio Code', '.'], { cwd: projectDir, allowFail: true });

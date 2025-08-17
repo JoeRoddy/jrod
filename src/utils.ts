@@ -56,3 +56,27 @@ export async function renderTemplates(opts: RenderTemplatesOptions): Promise<voi
   if (verbose) console.log('▶ Rendering Eta templates...');
   walk(templatesDir);
 }
+
+// Heuristic to detect if we're running the CLI from a development checkout (vs an installed npm package).
+// We treat presence of a .git directory at the package root OR an explicit env flag as dev mode.
+export const isDevEnvironment = (): boolean => {
+  if (process.env.JR_SCRIPTS_FORCE_DEV === '1') return true;
+  try {
+    // Walk upward from current file to find nearest package.json (limit depth to avoid traversing entire FS)
+    let dir = __dirname;
+    for (let i = 0; i < 6; i++) {
+      const pkgPath = path.join(dir, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        // If a .git folder exists alongside package.json we assume a repo checkout
+        const gitDir = path.join(dir, '.git');
+        return fs.existsSync(gitDir);
+      }
+      const parent = path.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+};

@@ -12,7 +12,8 @@
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build && npm run postbuild",
     "npm-publish": "npm run prepare && npm version patch && npm publish",
-    "start": "node dist/cli.js --help"
+    "start": "node dist/cli.js --help",
+    "mknext:test": "JR_SCRIPTS_FORCE_DEV=1 npx tsx ./src/cli.ts mknext test-app"
   },
   "keywords": [],
   "author": "",
