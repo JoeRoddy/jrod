@@ -1,6 +1,6 @@
 {
   "name": "jrod",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Misc development scripts",
   "type": "commonjs",
   "bin": {
