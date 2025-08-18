@@ -1,19 +1,28 @@
 {
   "name": "jrod",
-  "version": "1.0.1",
+  "version": "1.0.11",
   "description": "Misc development scripts",
   "type": "commonjs",
   "bin": {
-    "jrod": "./bin/cli.js"
+    "jrod": "dist/cli.js"
   },
+  "main": "dist/cli.js",
+  "types": "dist/cli.d.ts",
   "scripts": {
-    "postinstall": "chmod +x mknext.sh",
-    "start": "node ./bin/jrod.js --help"
+    "build": "tsc -p tsconfig.json",
+    "npm-publish": "npm run build && npm version patch && npm publish",
+    "start": "node dist/cli.js --help",
+    "mknext:test": "JR_SCRIPTS_FORCE_DEV=1 npx tsx ./src/cli.ts mknext test-app"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "eta": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.2",
+    "typescript": "^5.2.2"
   }
 }
