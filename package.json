@@ -10,8 +10,7 @@
   "types": "dist/cli.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "npm run build && npm run postbuild",
-    "npm-publish": "npm run prepare && npm version patch && npm publish",
+    "npm-publish": "npm run build && npm version patch && npm publish",
     "start": "node dist/cli.js --help",
     "mknext:test": "JR_SCRIPTS_FORCE_DEV=1 npx tsx ./src/cli.ts mknext test-app"
   },
