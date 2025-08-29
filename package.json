@@ -9,11 +9,15 @@
   "main": "dist/cli.js",
   "types": "dist/cli.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.cjs",
     "npm-publish": "npm run build && npm version patch && npm publish",
     "start": "node dist/cli.js --help",
     "mknext:test": "JR_SCRIPTS_FORCE_DEV=1 npx tsx ./src/cli.ts mknext test-app"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
