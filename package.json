@@ -1,6 +1,6 @@
 {
   "name": "jrod",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Misc development scripts",
   "type": "commonjs",
   "bin": {
@@ -17,7 +17,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-    "_moduleAliases": {
+  "_moduleAliases": {
     "@": "dist"
   },
   "dependencies": {
@@ -29,5 +29,4 @@
     "@types/node": "^20.4.2",
     "typescript": "^5.2.2"
   }
-
 }
