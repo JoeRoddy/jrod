@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// https://dev.to/larswaechter/path-aliases-with-typescript-in-nodejs-4353
+import 'module-alias/register';
 import { Command } from 'commander';
 import packageJson from '../package.json';
 import { mkNextCommand } from '@/commands/mk-next/mk-next';

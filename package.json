@@ -17,12 +17,17 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+    "_moduleAliases": {
+    "@": "dist"
+  },
   "dependencies": {
     "commander": "^12.1.0",
-    "eta": "^3.5.0"
+    "eta": "^3.5.0",
+    "module-alias": "^2.2.3"
   },
   "devDependencies": {
     "@types/node": "^20.4.2",
     "typescript": "^5.2.2"
   }
+
 }
