@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { auth, getServerSession } from '@/lib/auth';
+import { auth, getServerSession } from '@/lib/auth/auth';
 import { headers as getHeaders } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
